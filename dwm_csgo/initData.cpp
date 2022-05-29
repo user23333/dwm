@@ -2,6 +2,9 @@
 #include "Dwm_Dram.h"
 extern Dwm_Dram* pDwm;
 int nCnt; //优化性能 记录次数
+
+
+
 namespace G
 {
 	HWND g_hwnd;
@@ -207,6 +210,7 @@ void render_player_box(player_list* players)
 
 	int self_camp = get_self_camp(players);
 
+
 	for (int i = 0; i < g_players_count; i++)
 	{
 		if (players[i].effective  && players[i].self == false && players[i].blood > 1 && (players[i].更新时机EX == 0) && self_camp != players[i].camp)
@@ -218,8 +222,7 @@ void render_player_box(player_list* players)
 				{
 					players[i].aimbot_len = get_aimbot_len(window_w, window_h, x + (w / 2), y + (h / 2));
 
-
-					pDwm->Dwm_StartDraw();
+				
 
 					if (Menum::rect) 
 					{
@@ -228,6 +231,7 @@ void render_player_box(player_list* players)
 
 						pDwm->draw_rect(x, y, w, h, 绿色, 2);
 					}
+				
 					if (Menum::point)
 					{
 						pos = { 0,0 };
@@ -245,13 +249,12 @@ void render_player_box(player_list* players)
 						
 					}
 
-					pDwm->Dwm_EndDraw();
-					Sleep(1);
 
 				}
 			}
 		}
 	}
+
 }
 
 
@@ -529,14 +532,10 @@ void dram_menum()
 {
 	if (!Menum::show)
 	{
-		pDwm->Dwm_StartDraw();
-		pDwm->draw_text(50+ G::rect.left, 200 - 30+ G::rect.top, 绿色,"Ins / End ");
-		pDwm->draw_text(50 + G::rect.left, 200 + G::rect.top, 绿色,(Menum::rect ? "F1 Rect On" : "F1 Rect Off") );
-		pDwm->draw_text(50 + G::rect.left, 200 + 30 + G::rect.top, 绿色,(Menum::point ? "F2 point On" : "F2 point Off"));
-		pDwm->draw_text(50 + G::rect.left, 200 + 60 + G::rect.top, 绿色,(Menum::ambot ? "F3 ambot On" : "F3 ambot Off"));
-		
-		pDwm->Dwm_EndDraw();
-		Sleep(1);
+		pDwm->draw_text(50 + G::rect.left, 200 - 30 + G::rect.top, 绿色, "Ins / End ");
+		pDwm->draw_text(50 + G::rect.left, 200 + G::rect.top, 绿色, (Menum::rect ? "F1 Rect On" : "F1 Rect Off"));
+		pDwm->draw_text(50 + G::rect.left, 200 + 30 + G::rect.top, 绿色, (Menum::point ? "F2 point On" : "F2 point Off"));
+		pDwm->draw_text(50 + G::rect.left, 200 + 60 + G::rect.top, 绿色, (Menum::ambot ? "F3 ambot On" : "F3 ambot Off"));
 	}
 }
 
@@ -557,14 +556,11 @@ void render()
 
 	GetWindowRect(G::g_hwnd, &G::rect);
 
-	dram_menum();
 	monitor_key();
 
 	init_play_list(G::g_players);
 
 	set_self_camp(G::g_players);
-
-	render_player_box(G::g_players);
 
 	if (Menum::ambot) {
 		if (get_mouse_left_down())
@@ -572,6 +568,19 @@ void render()
 			aimbot_players(G::g_players);
 		}
 	}
+
+
+	pDwm->Dwm_StartDraw();
+
+	dram_menum();
+
+	if (Menum::rect || Menum::point) 
+	{
+		render_player_box(G::g_players);
+	}
+	pDwm->Dwm_EndDraw();
+	Sleep(1);
+
 }
 
 string get_distance_len(ImVec3* pos)

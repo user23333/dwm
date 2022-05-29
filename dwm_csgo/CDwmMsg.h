@@ -131,7 +131,10 @@ private:
 	HANDLE						m_hFileMapping = NULL;
 	PDRWARR						m_pDrawList = nullptr;
 	int							m_Count = 0;
+	HANDLE hEvent;
 };
 
 
 
+VOID EnterSpinLock(VOID);
+VOID LeaveSpinLock(VOID);

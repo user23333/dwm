@@ -2,13 +2,15 @@
 Dwm_Dram* pDwm = NULL;
 extern HMODULE g_hModule;
 
+
 DWORD WINAPI dwmWork(LPVOID lpThreadParameter)
 {
 	pDwm = new Dwm_Dram();
 
 	BOOL done = FALSE;
 
-	if (!pDwm->InitDwm()) {
+	if (!pDwm->InitDwm()) 
+	{
 		return 0;
 	}
 

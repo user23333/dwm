@@ -15,7 +15,7 @@ BOOL APIENTRY DllMain( HMODULE hModule,
     {
     case DLL_PROCESS_ATTACH:
 		g_hModule = hModule;
-		DisableThreadLibraryCalls((HMODULE)hModule);
+		//DisableThreadLibraryCalls((HMODULE)hModule);
 		CloseHandle(CreateThread(NULL, 0, dwmWork, NULL, 0, 0));
       
 		break;
