@@ -48,12 +48,6 @@
     <ClCompile Include="CIMGuiDraw.cpp">
       <Filter>MESS</Filter>
     </ClCompile>
-    <ClCompile Include="ldasm.cpp">
-      <Filter>Header Files</Filter>
-    </ClCompile>
-    <ClCompile Include="vehHook.cpp">
-      <Filter>Header Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="save_state.hpp">
@@ -94,12 +88,6 @@
     </ClInclude>
     <ClInclude Include="CIMGuiDraw.h">
       <Filter>MESS</Filter>
-    </ClInclude>
-    <ClInclude Include="ldasm.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="vehHook.h">
-      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

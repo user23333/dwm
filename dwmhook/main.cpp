@@ -5,18 +5,8 @@
 #include "IMGUI/MyImGui.h"
 #include "ck.h"
 #include "CIMGuiDraw.h"
-#include "vehHook.h"
 CIMGuiDraw g_ImGuiDraw;
-static ImDrawList* drawList = NULL;
-#define  绿色 -16711936
-WNDPROC g_original_proc = nullptr;
-void draw_line(float X1, float Y1, float X2, float Y2, float Width, ImColor Color);
-void draw_rect(float X, float Y, float W, float H, float Width, ImColor Color);
-void draw_text(float X, float Y, float fontSize, std::string Str, ImColor Color);
-void draw_circle(float X, float Y, float radius/*半径*/, ImColor Color);
-void draw_spot(float X, float Y, float radius/*半径*/, ImColor Color);
-
-
+HANDLE hEvent = NULL;
 
 BOOL bDataCompare( const BYTE* pData, const BYTE* bMask, const char* szMask )
 {
@@ -49,29 +39,29 @@ void DrawEverything( IDXGISwapChain* pDxgiSwapChain )
 	static bool b = true;
 	if ( b )
 	{
-		HWND hwnd = FindWindow(L"Progman", L"Program Manager");
-
 		ID3D11Device* pDevice = NULL;
 		pDxgiSwapChain->GetDevice(__uuidof(ID3D11Device), (void**)&pDevice);
 		//初始化migui
-		if (g_ImGuiDraw.InitMiGuiDx11(pDxgiSwapChain, pDevice, hwnd))
+		if (g_ImGuiDraw.InitMiGuiDx11(pDxgiSwapChain, pDevice))
 		{
-		//	g_original_proc = (WNDPROC)SetWindowLongPtrW(hwnd, GWLP_WNDPROC, (ULONG_PTR)self_proc);
-			CK_TRACE_INFO("hzw:ImGui初始化成功!\n");
+			CK_TRACE_INFO("ImGui初始化成功!\n");
 		}
 
 		if (g_ImGuiDraw.InitMessage())
 		{
-			CK_TRACE_INFO("hzw:通讯初始化成功!\n");
-
+			CK_TRACE_INFO("通讯初始化成功!\n");
 		}
 		b = false;
+	
+		hEvent = CreateEvent(NULL, FALSE, TRUE, L"dwm_event");
+		CK_TRACE_INFO("hzw:事件%x\n", hEvent);
 	}
 	else
 	{
+		//单线程跑 加不加都无所谓
+		//EnterSpinLock();
 		g_ImGuiDraw.ImGuiDx11Draw();
-		
-
+		//LeaveSpinLock();
 	}
 }
 
@@ -95,7 +85,8 @@ __int64 __fastcall hkPresentDWM( void* thisptr, IDXGISwapChain* pDxgiSwapChain, 
 
 UINT WINAPI MainThread( PVOID )
 {
-	
+	MH_Initialize();
+
 	while ( !GetModuleHandleA( "dwmcore.dll" ) )
 		Sleep( 150 );
 
@@ -118,20 +109,10 @@ UINT WINAPI MainThread( PVOID )
 	{
 		dwRender = ResolveRelative( dwRender );
 
-		PDWORD_PTR Vtbl = PDWORD_PTR(dwRender);
-
-
-		VEH_Initialize();
-		VEH_CreateHook(PVOID(Vtbl[6]), PVOID(&hkPresentDWM), reinterpret_cast<PVOID*>(&oPresentDWM));
-		VEH_CreateHook(PVOID(Vtbl[7]), PVOID(&hkPresentMPO), reinterpret_cast<PVOID*>(&oPresentMPO));
-		VEH_EnableHook();
-
-		//MH_Initialize();
-		//MH_CreateHook(PVOID(Vtbl[6]), PVOID(&hkPresentDWM), reinterpret_cast<PVOID*>(&oPresentDWM));
-		//MH_CreateHook(PVOID(Vtbl[7]), PVOID(&hkPresentMPO), reinterpret_cast<PVOID*>(&oPresentMPO));
-		////ck_printf("hzw:oPresentDWM::%llx\n", PVOID(Vtbl[6]));
-		////ck_printf("hzw:oPresentDWM::%llx\n", PVOID(Vtbl[7]));
-		//MH_EnableHook(MH_ALL_HOOKS);
+		PDWORD_PTR Vtbl = PDWORD_PTR( dwRender );
+		MH_CreateHook( PVOID( Vtbl[ 6 ] ), PVOID( &hkPresentDWM ), reinterpret_cast< PVOID* >( &oPresentDWM ) );
+		MH_CreateHook( PVOID( Vtbl[ 7 ] ), PVOID( &hkPresentMPO ), reinterpret_cast< PVOID* >( &oPresentMPO ) );
+		MH_EnableHook( MH_ALL_HOOKS );
 	}
 	return 0;
 }
@@ -147,31 +128,4 @@ BOOL WINAPI DllMain( HMODULE hDll, DWORD dwReason, PVOID )
 			DLLInitialization();
 	}
 	return true;
-}
-
-
-void draw_line(float X1, float Y1, float X2, float Y2, float Width, ImColor Color)
-{
-	drawList->AddLine({ X1,Y1 }, { X2,Y2 }, Color, Width);
-}
-
-void draw_rect(float X, float Y, float W, float H, float Width, ImColor Color)
-{
-	drawList->AddRect({ X,Y }, { W + X,H + Y }, Color, 0, 0, Width);
-}
-
-void draw_text(float X, float Y, float fontSize, std::string Str, ImColor Color)
-{
-
-	drawList->AddText(NULL, fontSize, { X,Y }, Color, Str.c_str());
-}
-
-void draw_circle(float X, float Y, float radius/*半径*/, ImColor Color)
-{
-
-	drawList->AddCircle({ X,Y }, radius, Color);
-}
-void draw_spot(float X, float Y, float radius/*半径*/, ImColor Color)
-{
-	drawList->AddCircleFilled({ X,Y }, radius, Color);
 }

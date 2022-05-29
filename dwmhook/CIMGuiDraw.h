@@ -8,8 +8,6 @@
 /*共享内存*/
 #define MAPNAME L"hzw_dwm"
 
-#define MAPNAME_Mutext L"hzw_dwm_Mutext"
-
 struct DrawTextStr
 {
 	float	m_X;
@@ -105,15 +103,11 @@ struct DrawInfo
 //对画图状态 以及画的东西描述
 typedef struct DrawArr
 {
-	/*
-	* 两个标志
-	*/
 	bool		m_DrawDll;//true exe可以画 false停止画
 	/*
 	* 这边可以自己扩展相应的结构体描述图像
 	*/
 	int			m_DrawCount;
-
 	DrawInfo	m_DrawInfoArr[MAX_DRAW];
 }DRAWARR, * PDRWARR;
 
@@ -128,7 +122,7 @@ public:
 	* 提交所有画
 	*/
 	void ImGuiDx11Draw();
-	bool InitMiGuiDx11(IDXGISwapChain* pSwapChain, ID3D11Device* pd3dDevice, HWND hwnd);
+	bool InitMiGuiDx11(IDXGISwapChain* pSwapChain, ID3D11Device* pd3dDevice);
 	/*
 	* 初始化通讯 m_pDrawAll
 	*/
@@ -149,8 +143,6 @@ private:
 };
 
 
-class Lock {
-private:
-	static inline std::mutex mutex;
-	std::scoped_lock<std::mutex> lock{ mutex };
-};
+VOID WINAPI EnterSpinLock(VOID);
+VOID WINAPI LeaveSpinLock(VOID);
+void OutputDebugPrintf(const char* strOutputString, ...);
